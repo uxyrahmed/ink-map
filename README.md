@@ -2,7 +2,7 @@
 
 A map drawn in ink, with pins. A small React component: the drawing is two SVG masks, so it takes any colours and sits straight on your page with nothing painted behind it. It comes with the Maldives, and a tool to draw any other place.
 
-No map library, no tiles, no API key. About 3 KB of JavaScript plus the drawing.
+No map library, no tiles, no API key. A few KB of JavaScript plus the drawing.
 
 ## Install
 
@@ -93,6 +93,41 @@ const [x, y] = locate(maldives.frame, [73.509, 4.175]);
 ```
 
 `ratio(frame)` gives a drawing's width over its height.
+
+## Zooming in on one place
+
+`InkLocator` shows the whole map with a pin, and beside it a close-up of that place through a round glass: the islands in ink, the reef flats around them.
+
+```tsx
+import { InkLocator, maldives } from "@uxyrahmed/ink-map";
+import { maldivesCloseUp } from "@uxyrahmed/ink-map/maldives-closeup";
+
+// In a server component, or at build time:
+const at = [73.4203, 3.8662]; // longitude, latitude
+const closeUp = await maldivesCloseUp(at);
+
+<InkLocator drawing={maldives} at={at} closeUp={closeUp} label="Ithaafushi, South Malé Atoll" />
+```
+
+`maldivesCloseUp` works for any point in the Maldives: the package carries detailed outlines of every island and reef. How far it zooms is the `span`, in degrees of latitude:
+
+```ts
+await maldivesCloseUp(at, { span: 0.5 });  // a whole atoll
+await maldivesCloseUp(at, { span: 0.14 }); // an island and its reefs (the default)
+await maldivesCloseUp(at, { span: 0.03 }); // one island, close
+```
+
+The outlines are about 1.7 MB, so draw the close-up on the server or at build time and pass the result down. It is a small object of SVG paths.
+
+For another place, draw the close-up from your own detailed GeoJSON:
+
+```ts
+import { drawCloseUp, polygons } from "@uxyrahmed/ink-map";
+
+const closeUp = drawCloseUp(at, { land: polygons(islandsGeoJson), shallows: polygons(reefsGeoJson) }, { span: 0.2 });
+```
+
+`polygons(geojson, ["kind", "island"])` takes only the features with that property. `shallows` is optional.
 
 ## Another place
 

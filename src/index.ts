@@ -4,3 +4,5 @@ export { InkCredit } from "./InkCredit.js";
 export { locate, ratio, mercatorY, type Drawing, type Frame, type LngLat, type Spot } from "./frame.js";
 export { themes, reef, mono, night, themeVars, type Theme } from "./themes.js";
 export { maldives } from "./maldives.js";
+export { InkLocator, type InkLocatorProps } from "./InkLocator.js";
+export { drawCloseUp, polygons, type CloseUp, type CloseUpOptions, type Polygon, type Shapes } from "./closeup.js";

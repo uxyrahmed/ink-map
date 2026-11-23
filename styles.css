@@ -128,3 +128,89 @@
     transition: none;
   }
 }
+
+/* InkLocator: the whole map with a round close-up of one place ---------- */
+
+:where(.inkmap-locator) {
+  position: relative;
+  width: 100%;
+}
+
+.inkmap-locator-whole {
+  position: absolute;
+  inset: 0 auto 0 0;
+  aspect-ratio: auto; /* as tall as the figure: its width is set to match */
+}
+
+/* Two fine lines from the pin to the rim of the glass */
+.inkmap-locator-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.inkmap-locator-lines path {
+  fill: none;
+  stroke: var(--inkmap-accent, #bc1b23);
+  stroke-width: 1px;
+  stroke-linejoin: round;
+}
+
+/* The pin on the map, and the place at the middle of the glass */
+.inkmap-locator-dot,
+.inkmap-locator-site {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--inkmap-accent, #bc1b23);
+  box-shadow: 0 0 0 2px var(--inkmap-ground, #f4f2ee);
+  translate: -50% -50%;
+}
+
+.inkmap-locator-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+.inkmap-locator-glass {
+  position: absolute;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--inkmap-accent, #bc1b23);
+  border-radius: 50%;
+  background: var(--inkmap-ground, #f4f2ee);
+}
+
+.inkmap-locator-glass svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.inkmap-locator-wash {
+  fill: none;
+  stroke: var(--inkmap-wash, #3fb8b2);
+  stroke-linejoin: round;
+  opacity: 0.1;
+}
+
+.inkmap-locator-shallows {
+  fill: color-mix(in srgb, var(--inkmap-wash, #3fb8b2) 16%, transparent);
+  stroke: var(--inkmap-ink, #0d5c69);
+  stroke-width: 1px;
+}
+
+.inkmap-locator-land {
+  fill: var(--inkmap-ink, #0d5c69);
+}
+
+.inkmap-locator-site {
+  top: 50%;
+  left: 50%;
+  width: 0.75rem;
+  height: 0.75rem;
+  box-shadow:
+    0 0 0 2px var(--inkmap-ground, #f4f2ee),
+    0 0 0 0.6rem color-mix(in srgb, var(--inkmap-accent, #bc1b23) 20%, transparent);
+}

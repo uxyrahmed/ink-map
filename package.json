@@ -10,6 +10,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./maldives-closeup": {
+      "types": "./dist/maldivesCloseUp.d.ts",
+      "default": "./dist/maldivesCloseUp.js"
+    },
     "./styles.css": "./styles.css",
     "./maldives.css": "./maldives.css",
     "./maldives/*": "./maldives/*",
