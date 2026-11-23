@@ -1,0 +1,43 @@
+{
+  "name": "@uxyrahmed/ink-map",
+  "version": "0.1.0",
+  "description": "A map drawn in ink, with pins: a React component that takes any colours and any drawing. Comes with the Maldives.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./styles.css",
+    "./maldives.css": "./maldives.css",
+    "./maldives/*": "./maldives/*",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "ink-map-draw": "./bin/draw.mjs"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "maldives",
+    "styles.css",
+    "maldives.css"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "react": "^19.3.0",
+    "typescript": "^7.0.2"
+  },
+  "repository": "github:uxyrahmed/ink-map"
+}

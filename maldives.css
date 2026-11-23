@@ -1,0 +1,11 @@
+/* The Maldives drawing (`maldives` in the package). Reef outlines © OpenStreetMap contributors, ODbL. */
+
+.inkmap-chart[data-drawing="maldives"] > .inkmap-wash {
+  -webkit-mask-image: url("./maldives/wash.svg");
+  mask-image: url("./maldives/wash.svg");
+}
+
+.inkmap-chart[data-drawing="maldives"] > .inkmap-ink {
+  -webkit-mask-image: url("./maldives/ink.svg");
+  mask-image: url("./maldives/ink.svg");
+}

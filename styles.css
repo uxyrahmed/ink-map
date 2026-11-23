@@ -1,0 +1,130 @@
+/*
+ * ink-map: a map drawn in ink, with pins.
+ *
+ * Colours and timing are CSS variables, set by the `theme` prop or in your
+ * own stylesheet on the map or anything around it:
+ *
+ *   --inkmap-ink      the land or reefs
+ *   --inkmap-wash     the pale water around them
+ *   --inkmap-accent   pins, and the whole drawing while highlighted
+ *   --inkmap-ground   the colour behind the map (the ring around a pin)
+ *   --inkmap-duration, --inkmap-ease-out, --inkmap-ease-in-out
+ *
+ * The layout rules are wrapped in :where(), so any class of your own
+ * overrides them whatever order the stylesheets load in.
+ */
+
+:where(.inkmap) {
+  position: relative;
+}
+
+.inkmap[data-near] {
+  cursor: pointer;
+}
+
+/* The drawing's box. Give it a width or a height and its shape gives the other. */
+:where(.inkmap-chart) {
+  position: relative;
+  aspect-ratio: var(--inkmap-ratio);
+}
+
+/* The drawing is two masks, coloured here: the ink, and the shallow water
+   around it as a pale wash. Nothing is painted behind them, so the page
+   colour shows through. */
+.inkmap-wash,
+.inkmap-ink {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transition: background-color 500ms var(--inkmap-ease-in-out, cubic-bezier(0.65, 0, 0.35, 1));
+}
+
+.inkmap-wash {
+  background-color: var(--inkmap-wash, #3fb8b2);
+}
+
+.inkmap-ink {
+  background-color: var(--inkmap-ink, #0d5c69);
+}
+
+/* Something that covers the whole area: the drawing in the accent colour. */
+.inkmap-chart[data-highlight] > :is(.inkmap-wash, .inkmap-ink) {
+  background-color: var(--inkmap-accent, #bc1b23);
+}
+
+.inkmap-pins {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A pin: a dot ringed in the ground colour, in a hit area big enough for a finger. */
+.inkmap-pin {
+  position: absolute;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: -0.75rem 0 0 -0.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  transition: opacity var(--inkmap-duration, 260ms);
+}
+
+.inkmap-pin::before,
+.inkmap-pin::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* The soft ring around the picked one */
+.inkmap-pin::before {
+  inset: 0;
+  background: color-mix(in srgb, var(--inkmap-accent, #bc1b23) 20%, transparent);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity var(--inkmap-duration, 260ms),
+    transform 420ms var(--inkmap-ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.inkmap-pin::after {
+  inset: 0.4375rem;
+  background: var(--inkmap-accent, #bc1b23);
+  box-shadow: 0 0 0 2px var(--inkmap-ground, #f4f2ee);
+  transition: transform var(--inkmap-duration, 260ms) var(--inkmap-ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+
+.inkmap-pin[aria-pressed="true"] {
+  z-index: 1;
+}
+
+.inkmap-pin[aria-pressed="true"]::before {
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+.inkmap-pin[aria-pressed="true"]::after {
+  transform: scale(1.2);
+}
+
+.inkmap-chart[data-highlight] .inkmap-pin {
+  opacity: 0.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inkmap-wash,
+  .inkmap-ink,
+  .inkmap-pin,
+  .inkmap-pin::before,
+  .inkmap-pin::after {
+    transition: none;
+  }
+}
