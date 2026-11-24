@@ -1,6 +1,6 @@
 {
   "name": "@uxyrahmed/ink-map",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A map drawn in ink, with pins: a React component that takes any colours and any drawing. Comes with the Maldives.",
   "type": "module",
   "main": "./dist/index.js",

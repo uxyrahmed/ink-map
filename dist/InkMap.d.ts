@@ -9,6 +9,10 @@ export type Pin = {
     lngLat?: LngLat;
     /** Or where it is on the drawing, as fractions of its width and height (from `locate`, worked out ahead of time). */
     spot?: Spot;
+    /** Its own colour, any CSS colour. Leave out for the accent. */
+    color?: string;
+    /** Its dot's width in pixels. 10 by default. */
+    size?: number;
 };
 /** How a pin was picked: the mouse came near it, it was tapped or clicked, or it was reached with the keyboard. */
 export type PickHow = "point" | "tap" | "focus";

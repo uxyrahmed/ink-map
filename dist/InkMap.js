@@ -14,9 +14,13 @@ export function InkMap({ drawing, pins, active, defaultActive, onPick, pickOnHov
     const picked = active === undefined ? own : active;
     const [near, setNear] = useState(false);
     const chart = useRef(null);
+    // On a drawing zoomed in with `crop`, a pin outside the part in view is left out.
+    const zoomed = drawing.frame.full !== undefined;
     const placed = pins.flatMap((pin) => {
         const spot = pin.spot ?? (pin.lngLat && locate(drawing.frame, pin.lngLat));
-        return spot ? [{ ...pin, spot }] : [];
+        if (!spot || (zoomed && (spot[0] < 0 || spot[0] > 1 || spot[1] < 0 || spot[1] > 1)))
+            return [];
+        return [{ ...pin, spot }];
     });
     function pick(id, how) {
         if (active === undefined)
@@ -52,5 +56,10 @@ export function InkMap({ drawing, pins, active, defaultActive, onPick, pickOnHov
         if (found !== undefined)
             pick(found, "tap");
     }
-    return (_jsxs("div", { className: className ? `inkmap ${className}` : "inkmap", "data-near": near ? "" : undefined, "data-highlight": highlight ? "" : undefined, style: { ...themeVars(theme), ...style }, onPointerMove: point, onPointerLeave: () => setNear(false), onClick: tap, children: [_jsx(InkChart, { ref: chart, drawing: drawing, highlight: highlight, label: label, className: chartClassName, children: _jsx("ul", { className: "inkmap-pins", children: placed.map((pin) => (_jsx("li", { children: _jsx("button", { type: "button", className: "inkmap-pin", style: { left: `${pin.spot[0] * 100}%`, top: `${pin.spot[1] * 100}%` }, "aria-pressed": pin.id === picked, "aria-label": pin.label, onFocus: () => pin.id !== picked && pick(pin.id, "focus"), onClick: (event) => event.detail === 0 && pick(pin.id, "tap") }) }, pin.id))) }) }), children] }));
+    return (_jsxs("div", { className: className ? `inkmap ${className}` : "inkmap", "data-near": near ? "" : undefined, "data-highlight": highlight ? "" : undefined, style: { ...themeVars(theme), ...style }, onPointerMove: point, onPointerLeave: () => setNear(false), onClick: tap, children: [_jsx(InkChart, { ref: chart, drawing: drawing, highlight: highlight, label: label, className: chartClassName, children: _jsx("ul", { className: "inkmap-pins", children: placed.map((pin) => (_jsx("li", { children: _jsx("button", { type: "button", className: "inkmap-pin", style: {
+                                left: `${pin.spot[0] * 100}%`,
+                                top: `${pin.spot[1] * 100}%`,
+                                ...(pin.color ? { "--inkmap-accent": pin.color } : null),
+                                ...(pin.size ? { "--inkmap-pin": `${pin.size}px` } : null),
+                            }, "aria-pressed": pin.id === picked, "aria-label": pin.label, onFocus: () => pin.id !== picked && pick(pin.id, "focus"), onClick: (event) => event.detail === 0 && pick(pin.id, "tap") }) }, pin.id))) }) }), children] }));
 }

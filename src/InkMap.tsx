@@ -13,6 +13,10 @@ export type Pin = {
   lngLat?: LngLat;
   /** Or where it is on the drawing, as fractions of its width and height (from `locate`, worked out ahead of time). */
   spot?: Spot;
+  /** Its own colour, any CSS colour. Leave out for the accent. */
+  color?: string;
+  /** Its dot's width in pixels. 10 by default. */
+  size?: number;
 };
 
 /** How a pin was picked: the mouse came near it, it was tapped or clicked, or it was reached with the keyboard. */
@@ -72,9 +76,12 @@ export function InkMap({
   const [near, setNear] = useState(false);
   const chart = useRef<HTMLDivElement>(null);
 
+  // On a drawing zoomed in with `crop`, a pin outside the part in view is left out.
+  const zoomed = drawing.frame.full !== undefined;
   const placed = pins.flatMap((pin) => {
     const spot = pin.spot ?? (pin.lngLat && locate(drawing.frame, pin.lngLat));
-    return spot ? [{ ...pin, spot }] : [];
+    if (!spot || (zoomed && (spot[0] < 0 || spot[0] > 1 || spot[1] < 0 || spot[1] > 1))) return [];
+    return [{ ...pin, spot }];
   });
 
   function pick(id: string, how: PickHow) {
@@ -125,7 +132,14 @@ export function InkMap({
               <button
                 type="button"
                 className="inkmap-pin"
-                style={{ left: `${pin.spot[0] * 100}%`, top: `${pin.spot[1] * 100}%` }}
+                style={
+                  {
+                    left: `${pin.spot[0] * 100}%`,
+                    top: `${pin.spot[1] * 100}%`,
+                    ...(pin.color ? { "--inkmap-accent": pin.color } : null),
+                    ...(pin.size ? { "--inkmap-pin": `${pin.size}px` } : null),
+                  } as CSSProperties
+                }
                 aria-pressed={pin.id === picked}
                 aria-label={pin.label}
                 onFocus={() => pin.id !== picked && pick(pin.id, "focus")}

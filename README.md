@@ -45,7 +45,7 @@ In Next.js the stylesheets can be imported in any component or in the root layou
 | Prop | What it does |
 | --- | --- |
 | `drawing` | The map to draw: `maldives`, or your own (below). |
-| `pins` | `{ id, label, lngLat }[]`. `lngLat` is `[longitude, latitude]`. Or give `spot`, a place on the drawing as fractions `[x, y]`, if you worked it out ahead with `locate()`. |
+| `pins` | `{ id, label, lngLat }[]`. `lngLat` is `[longitude, latitude]`. Or give `spot`, a place on the drawing as fractions `[x, y]`, if you worked it out ahead with `locate()`. A pin can have its own `color` (any CSS colour) and `size` (its dot's width in pixels). |
 | `active` | The picked pin's id. Leave it out and the map keeps track itself, from `defaultActive`. |
 | `onPick(id, how)` | Called when someone picks a pin. `how` is `"point"` (the mouse came near), `"tap"` (tap or click) or `"focus"` (keyboard). |
 | `pickOnHover` | Pick the pin the mouse comes near without a click. On by default. |
@@ -93,6 +93,63 @@ const [x, y] = locate(maldives.frame, [73.509, 4.175]);
 ```
 
 `ratio(frame)` gives a drawing's width over its height.
+
+## Zooming the map in to its pins
+
+When the pins sit in one part of the map, show that part. `fit()` gives the area that holds a set of points, and `crop()` zooms a drawing in to it. The result is a drawing like any other, so `InkMap`, `InkChart`, `locate` and `ratio` take it as it is, and it follows the points: add a pin further out and the map opens up to hold it.
+
+```tsx
+import { InkMap, InkChart, crop, fit, shown, maldives } from "@uxyrahmed/ink-map";
+
+const zoomed = crop(maldives, fit(pins.map((p) => p.lngLat), { padding: 0.12, ratio: 0.5 }));
+
+<InkMap drawing={zoomed} pins={pins} />
+```
+
+- `padding` is the room round the points, as a share of the longer side they span.
+- `ratio` is the shape to fill, width over height. The area grows to match it.
+- `minSpan` is the least it shows from north to south, in degrees of latitude, so one pin is not a blank patch of sea.
+
+The part in view slides back inside the drawing where it would run off an edge (`crop(drawing, bounds, { inside: false })` turns that off). Pins outside the part in view are left out.
+
+For a small map of the whole with a box round the part in view, `shown(zoomed.frame)` gives that part as fractions of the whole: left, top, width, height.
+
+```tsx
+const [left, top, width, height] = shown(zoomed.frame);
+
+<InkChart drawing={maldives} style={{ width: 32 }}>
+  <span style={{ position: "absolute", left: `${left * 100}%`, top: `${top * 100}%`, width: `${width * 100}%`, height: `${height * 100}%`, border: "1px solid" }} />
+</InkChart>
+```
+
+The country drawing is made for its whole height, so it holds up to a zoom of about three times. For closer, draw the area itself (next).
+
+## A close-up of an area, with points
+
+`InkArea` is a still picture of any rectangle: the land in ink, the reef flats outlined with a pale wash round them, and a dot on each point, each in its own colour. No JavaScript, so it works in a server component and a page can show dozens.
+
+```tsx
+import { InkArea, fit } from "@uxyrahmed/ink-map";
+import { maldivesArea } from "@uxyrahmed/ink-map/maldives-closeup";
+
+// In a server component, or at build time:
+const stations = [
+  { lngLat: [73.4328, 4.1684], label: "MTL-01" },
+  { lngLat: [73.5004, 4.1822], label: "MTL-02", color: "#d26a1e" },
+  { lngLat: [73.46, 4.175], label: "AQ-1", shape: "diamond", size: 10 },
+];
+const area = await maldivesArea(fit(stations.map((s) => s.lngLat), { ratio: 2.4, padding: 0.2 }), { size: 180 });
+
+<InkArea area={area} points={stations} label="Stations on the Malé to Thilafushi link" />
+```
+
+- `size` is the picture's height in pixels at its usual size, which sets how much detail the outlines keep. Draw it larger for a map people zoom into.
+- A point has `lngLat`, and optionally `color`, `size` (its width in pixels), `shape` (`"dot"` or `"diamond"`) and `label` (a tooltip). Points are drawn in order, so put the ones that matter last.
+- The picture keeps the area's shape. Give its box another shape in your own CSS (a fixed height, say) and the picture fills it, cut at the sides, so draw the area a little wider than the points need.
+
+For your own map on top (zoom and pan, labels), the area is plain data: `width`, `height`, two SVG paths (`land`, `shallows`) and its `bounds`. `place(area, lngLat)` gives a point's place on it as fractions, and `grow(bounds, 3)` gives a larger rectangle to draw so there is something to pan to.
+
+For another place, `drawArea(bounds, { land, shallows }, { size })` draws from your own outlines, as `drawCloseUp` does.
 
 ## Zooming in on one place
 

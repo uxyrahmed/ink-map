@@ -96,7 +96,7 @@
 }
 
 .inkmap-pin::after {
-  inset: 0.4375rem;
+  inset: calc((1.5rem - var(--inkmap-pin, 0.625rem)) / 2);
   background: var(--inkmap-accent, #bc1b23);
   box-shadow: 0 0 0 2px var(--inkmap-ground, #f4f2ee);
   transition: transform var(--inkmap-duration, 260ms) var(--inkmap-ease-out, cubic-bezier(0.2, 0.8, 0.2, 1));
@@ -213,4 +213,46 @@
   box-shadow:
     0 0 0 2px var(--inkmap-ground, #f4f2ee),
     0 0 0 0.6rem color-mix(in srgb, var(--inkmap-accent, #bc1b23) 20%, transparent);
+}
+
+/* InkArea: a still close-up of an area, with a dot on each point --------- */
+
+/* Its box keeps the area's shape. Give it another (a fixed height, say) and the picture fills it. */
+:where(.inkmap-area) {
+  position: relative;
+  aspect-ratio: var(--inkmap-ratio);
+  overflow: hidden;
+}
+
+.inkmap-area > svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.inkmap-area-wash {
+  fill: none;
+  stroke: var(--inkmap-wash, #3fb8b2);
+  stroke-linejoin: round;
+  opacity: 0.1;
+}
+
+.inkmap-area-shallows {
+  fill: color-mix(in srgb, var(--inkmap-wash, #3fb8b2) 16%, transparent);
+  stroke: var(--inkmap-ink, #0d5c69);
+  stroke-width: 1px;
+}
+
+.inkmap-area-land {
+  fill: var(--inkmap-ink, #0d5c69);
+}
+
+/* A point: a dot, or a diamond, ringed in the ground colour. */
+.inkmap-area-point {
+  fill: var(--inkmap-accent, #bc1b23);
+  stroke: var(--inkmap-ground, #f4f2ee);
+  stroke-width: 3px; /* half of it is under the dot */
+  paint-order: stroke;
 }
