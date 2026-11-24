@@ -1,5 +1,5 @@
 import { forwardRef, type CSSProperties, type ReactNode } from "react";
-import { ratio, type Drawing } from "./frame.js";
+import { ratio, type Drawing, type Frame } from "./frame.js";
 import { themeVars, type Theme } from "./themes.js";
 
 export type InkChartProps = {
@@ -17,7 +17,23 @@ export type InkChartProps = {
   children?: ReactNode;
 };
 
-const mask = (url?: string): CSSProperties | undefined => (url ? { maskImage: `url("${url}")`, WebkitMaskImage: `url("${url}")` } : undefined);
+/**
+ * A layer's mask: its SVG, where the drawing names one, and on a drawing zoomed in
+ * with `crop`, the size and place that put the part in view behind the box.
+ */
+function mask(url: string | undefined, { view, full }: Frame): CSSProperties | undefined {
+  const style: CSSProperties = url ? { maskImage: `url("${url}")`, WebkitMaskImage: `url("${url}")` } : {};
+  if (full) {
+    const [l, t, w, h] = view;
+    const [L, T, W, H] = full;
+    // As background-position: a percentage of the room left over, which is less than none here.
+    const at = (from: number, whole: number, part: number) => (Math.abs(whole - part) < 1e-9 ? 50 : ((from) / (whole - part)) * 100);
+    const size = `${((W / w) * 100).toFixed(3)}% ${((H / h) * 100).toFixed(3)}%`;
+    const position = `${at(l - L, W, w).toFixed(3)}% ${at(t - T, H, h).toFixed(3)}%`;
+    Object.assign(style, { maskSize: size, WebkitMaskSize: size, maskPosition: position, WebkitMaskPosition: position });
+  }
+  return url || full ? style : undefined;
+}
 
 /**
  * The drawing alone: two masks, coloured by the theme, with nothing painted
@@ -37,8 +53,8 @@ export const InkChart = forwardRef<HTMLDivElement, InkChartProps>(function InkCh
       data-highlight={highlight ? "" : undefined}
       style={{ "--inkmap-ratio": ratio(drawing.frame), ...themeVars(theme), ...style } as CSSProperties}
     >
-      {(drawing.wash || drawing.id) && <span className="inkmap-wash" aria-hidden="true" style={mask(drawing.wash)} />}
-      <span className="inkmap-ink" role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} style={mask(drawing.ink)} />
+      {(drawing.wash || drawing.id) && <span className="inkmap-wash" aria-hidden="true" style={mask(drawing.wash, drawing.frame)} />}
+      <span className="inkmap-ink" role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} style={mask(drawing.ink, drawing.frame)} />
       {children}
     </div>
   );
